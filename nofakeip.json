@@ -1,0 +1,16 @@
+{
+    "version":3,
+    "rules":[
+        {
+            "domain_suffix":[
+                "market.miaomi.com",
+                "msftncsi.com",
+                "msftconnecttest.com",
+                "wotgame.com",
+                "wggames.cn",
+                "wargaming.net",
+                "steamcontent.com"
+            ]
+        }
+    ]
+}
