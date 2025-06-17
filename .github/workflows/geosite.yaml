@@ -59,9 +59,7 @@ jobs:
           cd ../loon
           go run main.go ../domain-list-community ../release/loon
           wget --no-check-certificate -O ../release/loon/cn.mmdb https://raw.githubusercontent.com/yuumimi/chnroutes2mmdb/release/chnroutes.mmdb
-          cd ../qx
-          go run main.go ../domain-list-community ../release/qx
-          wget --no-check-certificate -O ../release/qx/cn.mmdb https://raw.githubusercontent.com/yuumimi/chnroutes2mmdb/release/chnroutes.mmdb
+
           cd ../surge
           go run main.go ../domain-list-community ../release/surge
           wget --no-check-certificate -O ../release/surge/cn.mmdb https://raw.githubusercontent.com/yuumimi/chnroutes2mmdb/release/chnroutes.mmdb
