@@ -96,18 +96,6 @@ jobs:
           sed '1i# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/cn\n' 6.tmp > ./release/loon/cn.txt
           sed '1i# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/geolocation-!cn\n' 8.tmp > ./release/loon/geolocation-\!cn.txt
 
-          cat ./release/qx/cn.txt | grep -Ev '^$|#' > 1.tmp
-          cat ./release/qx/cn@\!cn.txt | grep -Ev '^$|#' > 2.tmp
-          cat ./release/qx/geolocation-\!cn.txt | grep -Ev '^$|#' > 3.tmp
-          cat ./release/qx/geolocation-\!cn@cn.txt | grep -Ev '^$|#' > 4.tmp
-          cat 1.tmp 2.tmp 2.tmp | sort | uniq -u > 5.tmp
-          cat 5.tmp 4.tmp | sort | uniq > 6.tmp
-          cat 3.tmp 4.tmp 4.tmp | sort | uniq -u > 7.tmp
-          cat 7.tmp 2.tmp | sort | uniq > 8.tmp
-          sed -i 's/proxy$/direct/g' 6.tmp
-          sed '1i# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/cn\n' 6.tmp > ./release/qx/cn.txt
-          sed '1i# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/geolocation-!cn\n' 8.tmp > ./release/qx/geolocation-\!cn.txt
-
           cat ./release/surge/cn.txt | grep -Ev '^$|#' > 1.tmp
           cat ./release/surge/cn@\!cn.txt | grep -Ev '^$|#' > 2.tmp
           cat ./release/surge/geolocation-\!cn.txt | grep -Ev '^$|#' > 3.tmp
