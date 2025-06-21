@@ -1,0 +1,5 @@
+# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/ozon
+
+DOMAIN-SUFFIX,ozon.ru
+DOMAIN-SUFFIX,ozone.ru
+DOMAIN-SUFFIX,ozonusercontent.com

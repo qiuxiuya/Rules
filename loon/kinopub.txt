@@ -1,0 +1,6 @@
+# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/kinopub
+
+DOMAIN-SUFFIX,gfw.ovh
+DOMAIN-SUFFIX,kino.pub
+DOMAIN-SUFFIX,kinopub.online
+DOMAIN-SUFFIX,mos-gorsud.co
