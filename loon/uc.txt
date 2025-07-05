@@ -1,0 +1,6 @@
+# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/uc
+
+DOMAIN-SUFFIX,uc.cn
+DOMAIN-SUFFIX,uc123.com
+DOMAIN-SUFFIX,ucweb.com
+DOMAIN-SUFFIX,uczzd.cn

@@ -1,0 +1,5 @@
+# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/annas-archive
+
+DOMAIN-SUFFIX,annas-archive.li
+DOMAIN-SUFFIX,annas-archive.org
+DOMAIN-SUFFIX,annas-archive.se
