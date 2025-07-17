@@ -47,10 +47,6 @@ jobs:
           mkdir -p ../release/sing-box/rule-set
           go run main.go ../domain-list-community ../release/sing-box/rule-set
 
-      - name: Optional post-processing (Clash example)
-        run: |
-          cd clash-post && bash process-clash.sh
-
       - name: Get commit message
         id: commit
         uses: actions/github-script@v6
