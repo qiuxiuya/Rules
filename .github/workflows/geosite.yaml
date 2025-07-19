@@ -138,10 +138,3 @@ jobs:
           full_commit_message: ${{ steps.message.outputs.result }}
           force_orphan: true
           enable_jekyll: true
-
-      - name: Delete workflow runs
-        uses: GitRML/delete-workflow-runs@main
-        with:
-          token: ${{ secrets.AUTH_PAT }}
-          repository: ${{ github.repository }}
-          retain_days: 7
