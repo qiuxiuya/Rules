@@ -18,7 +18,7 @@ jobs:
 
       - name: Checkout data source
         uses: actions/checkout@v2
-        with: 
+        with:
           repository: v2fly/domain-list-community
           path: domain-list-community
 
@@ -115,7 +115,7 @@ jobs:
         id: message
         uses: actions/github-script@v3
         env:
-          FULL_COMMIT_MESSAGE: '${{ github.event.head_commit.message }}'
+          FULL_COMMIT_MESSAGE: "${{ github.event.head_commit.message }}"
         with:
           result-encoding: string
           script: |
@@ -130,11 +130,18 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          exclude_assets: '.nojekyll'
+          exclude_assets: ".nojekyll"
           publish_branch: geosite
           publish_dir: ./release
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
           full_commit_message: ${{ steps.message.outputs.result }}
           force_orphan: true
           enable_jekyll: true
+
+      - name: Delete workflow runs
+        uses: GitRML/delete-workflow-runs@main
+        with:
+          token: ${{ secrets.AUTH_PAT }}
+          repository: ${{ github.repository }}
+          retain_days: 7

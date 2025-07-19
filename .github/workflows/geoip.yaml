@@ -106,3 +106,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: geoip
           force: true
+
+      - name: Delete workflow runs
+        uses: GitRML/delete-workflow-runs@main
+        with:
+          token: ${{ secrets.AUTH_PAT }}
+          repository: ${{ github.repository }}
+          retain_days: 7
