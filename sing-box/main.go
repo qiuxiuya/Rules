@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -11,7 +12,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/google/go-github/v45/github"
 	"github.com/sagernet/sing-box/common/geosite"
 	"github.com/sagernet/sing-box/common/srs"
 	C "github.com/sagernet/sing-box/constant"
@@ -19,6 +19,8 @@ import (
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common"
 	E "github.com/sagernet/sing/common/exceptions"
+
+	"github.com/google/go-github/v45/github"
 	"github.com/v2fly/v2ray-core/v5/app/router/routercommon"
 	"google.golang.org/protobuf/proto"
 )
@@ -67,7 +69,7 @@ func download(release *github.RepositoryRelease) ([]byte, error) {
 		return nil, E.New("geosite asset not found in upstream release ", release.Name)
 	}
 	if geositeChecksumAsset == nil {
-		return nil, E.New("geosite checksum not found in upstream release ", release.Name)
+		return nil, E.New("geosite asset not found in upstream release ", release.Name)
 	}
 	data, err := get(geositeAsset.BrowserDownloadURL)
 	if err != nil {
@@ -91,47 +93,79 @@ func parse(vGeositeData []byte) (map[string][]geosite.Item, error) {
 		return nil, err
 	}
 	domainMap := make(map[string][]geosite.Item)
-	for _, entry := range vGeositeList.Entry {
-		code := strings.ToLower(entry.CountryCode)
-		var domains []geosite.Item
-		attributes := map[string][]*routercommon.Domain{}
-		for _, d := range entry.Domain {
-			for _, attr := range d.Attribute {
-				attributes[attr.Key] = append(attributes[attr.Key], d)
-			}
-			switch d.Type {
-			case routercommon.Domain_Plain:
-				domains = append(domains, geosite.Item{Type: geosite.RuleTypeDomainKeyword, Value: d.Value})
-			case routercommon.Domain_Regex:
-				domains = append(domains, geosite.Item{Type: geosite.RuleTypeDomainRegex, Value: d.Value})
-			case routercommon.Domain_RootDomain:
-				if strings.Contains(d.Value, ".") {
-					domains = append(domains, geosite.Item{Type: geosite.RuleTypeDomain, Value: d.Value})
+	for _, vGeositeEntry := range vGeositeList.Entry {
+		code := strings.ToLower(vGeositeEntry.CountryCode)
+		domains := make([]geosite.Item, 0, len(vGeositeEntry.Domain)*2)
+		attributes := make(map[string][]*routercommon.Domain)
+		for _, domain := range vGeositeEntry.Domain {
+			if len(domain.Attribute) > 0 {
+				for _, attribute := range domain.Attribute {
+					attributes[attribute.Key] = append(attributes[attribute.Key], domain)
 				}
-				domains = append(domains, geosite.Item{Type: geosite.RuleTypeDomainSuffix, Value: "." + d.Value})
+			}
+			switch domain.Type {
+			case routercommon.Domain_Plain:
+				domains = append(domains, geosite.Item{
+					Type:  geosite.RuleTypeDomainKeyword,
+					Value: domain.Value,
+				})
+			case routercommon.Domain_Regex:
+				domains = append(domains, geosite.Item{
+					Type:  geosite.RuleTypeDomainRegex,
+					Value: domain.Value,
+				})
+			case routercommon.Domain_RootDomain:
+				if strings.Contains(domain.Value, ".") {
+					domains = append(domains, geosite.Item{
+						Type:  geosite.RuleTypeDomain,
+						Value: domain.Value,
+					})
+				}
+				domains = append(domains, geosite.Item{
+					Type:  geosite.RuleTypeDomainSuffix,
+					Value: "." + domain.Value,
+				})
 			case routercommon.Domain_Full:
-				domains = append(domains, geosite.Item{Type: geosite.RuleTypeDomain, Value: d.Value})
+				domains = append(domains, geosite.Item{
+					Type:  geosite.RuleTypeDomain,
+					Value: domain.Value,
+				})
 			}
 		}
 		domainMap[code] = common.Uniq(domains)
-		for attr, attrEntries := range attributes {
-			var attrDomains []geosite.Item
-			for _, d := range attrEntries {
-				switch d.Type {
+		for attribute, attributeEntries := range attributes {
+			attributeDomains := make([]geosite.Item, 0, len(attributeEntries)*2)
+			for _, domain := range attributeEntries {
+				switch domain.Type {
 				case routercommon.Domain_Plain:
-					attrDomains = append(attrDomains, geosite.Item{Type: geosite.RuleTypeDomainKeyword, Value: d.Value})
+					attributeDomains = append(attributeDomains, geosite.Item{
+						Type:  geosite.RuleTypeDomainKeyword,
+						Value: domain.Value,
+					})
 				case routercommon.Domain_Regex:
-					attrDomains = append(attrDomains, geosite.Item{Type: geosite.RuleTypeDomainRegex, Value: d.Value})
+					attributeDomains = append(attributeDomains, geosite.Item{
+						Type:  geosite.RuleTypeDomainRegex,
+						Value: domain.Value,
+					})
 				case routercommon.Domain_RootDomain:
-					if strings.Contains(d.Value, ".") {
-						attrDomains = append(attrDomains, geosite.Item{Type: geosite.RuleTypeDomain, Value: d.Value})
+					if strings.Contains(domain.Value, ".") {
+						attributeDomains = append(attributeDomains, geosite.Item{
+							Type:  geosite.RuleTypeDomain,
+							Value: domain.Value,
+						})
 					}
-					attrDomains = append(attrDomains, geosite.Item{Type: geosite.RuleTypeDomainSuffix, Value: "." + d.Value})
+					attributeDomains = append(attributeDomains, geosite.Item{
+						Type:  geosite.RuleTypeDomainSuffix,
+						Value: "." + domain.Value,
+					})
 				case routercommon.Domain_Full:
-					attrDomains = append(attrDomains, geosite.Item{Type: geosite.RuleTypeDomain, Value: d.Value})
+					attributeDomains = append(attributeDomains, geosite.Item{
+						Type:  geosite.RuleTypeDomain,
+						Value: domain.Value,
+					})
 				}
 			}
-			domainMap[code+"@"+attr] = common.Uniq(attrDomains)
+			domainMap[code+"@"+attribute] = common.Uniq(attributeDomains)
 		}
 	}
 	return domainMap, nil
@@ -143,39 +177,62 @@ type filteredCodePair struct {
 }
 
 func filterTags(data map[string][]geosite.Item) {
-	var filteredCodeMap, mergedCodeMap []string
-	var badCodeList []filteredCodePair
+	var codeList []string
 	for code := range data {
-		if parts := strings.Split(code, "@"); len(parts) == 2 {
-			last := strings.Split(parts[0], "-")
-			base := last[len(last)-1]
-			if base == "" {
-				base = parts[0]
-			}
-			if base == parts[1] {
-				delete(data, code)
-				filteredCodeMap = append(filteredCodeMap, code)
-			} else if "!"+base == parts[1] || base == "!"+parts[1] {
-				badCodeList = append(badCodeList, filteredCodePair{code: parts[0], badCode: code})
-			}
+		codeList = append(codeList, code)
+	}
+	var badCodeList []filteredCodePair
+	var filteredCodeMap []string
+	var mergedCodeMap []string
+	for _, code := range codeList {
+		codeParts := strings.Split(code, "@")
+		if len(codeParts) != 2 {
+			continue
+		}
+		leftParts := strings.Split(codeParts[0], "-")
+		var lastName string
+		if len(leftParts) > 1 {
+			lastName = leftParts[len(leftParts)-1]
+		}
+		if lastName == "" {
+			lastName = codeParts[0]
+		}
+		if lastName == codeParts[1] {
+			delete(data, code)
+			filteredCodeMap = append(filteredCodeMap, code)
+			continue
+		}
+		if "!"+lastName == codeParts[1] {
+			badCodeList = append(badCodeList, filteredCodePair{
+				code:    codeParts[0],
+				badCode: code,
+			})
+		} else if lastName == "!"+codeParts[1] {
+			badCodeList = append(badCodeList, filteredCodePair{
+				code:    codeParts[0],
+				badCode: code,
+			})
 		}
 	}
-	for _, b := range badCodeList {
-		badList := data[b.badCode]
-		delete(data, b.badCode)
-		unique := make(map[geosite.Item]bool)
-		for _, i := range data[b.code] {
-			unique[i] = true
+	for _, it := range badCodeList {
+		badList := data[it.badCode]
+		if badList == nil {
+			panic("bad list not found: " + it.badCode)
 		}
-		for _, i := range badList {
-			delete(unique, i)
+		delete(data, it.badCode)
+		newMap := make(map[geosite.Item]bool)
+		for _, item := range data[it.code] {
+			newMap[item] = true
 		}
-		newList := make([]geosite.Item, 0, len(unique))
-		for item := range unique {
+		for _, item := range badList {
+			delete(newMap, item)
+		}
+		newList := make([]geosite.Item, 0, len(newMap))
+		for item := range newMap {
 			newList = append(newList, item)
 		}
-		data[b.code] = newList
-		mergedCodeMap = append(mergedCodeMap, b.badCode)
+		data[it.code] = newList
+		mergedCodeMap = append(mergedCodeMap, it.badCode)
 	}
 	sort.Strings(filteredCodeMap)
 	sort.Strings(mergedCodeMap)
@@ -184,35 +241,61 @@ func filterTags(data map[string][]geosite.Item) {
 }
 
 func mergeTags(data map[string][]geosite.Item) {
-	var cnCodes []string
+	var codeList []string
 	for code := range data {
-		if parts := strings.Split(code, "@"); len(parts) == 2 {
-			if parts[1] == "cn" && strings.HasPrefix(parts[0], "category-") && !strings.HasSuffix(parts[0], "-cn") {
-				cnCodes = append(cnCodes, code)
-			}
-		} else if strings.HasPrefix(code, "category-") && strings.HasSuffix(code, "-cn") {
-			cnCodes = append(cnCodes, code)
-		}
+		codeList = append(codeList, code)
 	}
-	union := make(map[geosite.Item]bool)
+	var cnCodeList []string
+	for _, code := range codeList {
+		codeParts := strings.Split(code, "@")
+		if len(codeParts) != 2 {
+			continue
+		}
+		if codeParts[1] != "cn" {
+			continue
+		}
+		if !strings.HasPrefix(codeParts[0], "category-") {
+			continue
+		}
+		if strings.HasSuffix(codeParts[0], "-cn") || strings.HasSuffix(codeParts[0], "-!cn") {
+			continue
+		}
+		cnCodeList = append(cnCodeList, code)
+	}
+	for _, code := range codeList {
+		if !strings.HasPrefix(code, "category-") {
+			continue
+		}
+		if !strings.HasSuffix(code, "-cn") {
+			continue
+		}
+		if strings.Contains(code, "@") {
+			continue
+		}
+		cnCodeList = append(cnCodeList, code)
+	}
+	newMap := make(map[geosite.Item]bool)
 	for _, item := range data["geolocation-cn"] {
-		union[item] = true
+		newMap[item] = true
 	}
-	for _, code := range cnCodes {
+	for _, code := range cnCodeList {
 		for _, item := range data[code] {
-			union[item] = true
+			newMap[item] = true
 		}
 	}
-	merged := make([]geosite.Item, 0, len(union))
-	for item := range union {
-		merged = append(merged, item)
+	newList := make([]geosite.Item, 0, len(newMap))
+	for item := range newMap {
+		newList = append(newList, item)
 	}
-	data["geolocation-cn"] = merged
-	data["cn"] = append(merged, geosite.Item{Type: geosite.RuleTypeDomainSuffix, Value: "cn"})
-	println("merged cn categories: " + strings.Join(cnCodes, ","))
+	data["geolocation-cn"] = newList
+	data["cn"] = append(newList, geosite.Item{
+		Type:  geosite.RuleTypeDomainSuffix,
+		Value: "cn",
+	})
+	println("merged cn categories: " + strings.Join(cnCodeList, ","))
 }
 
-func generate(release *github.RepositoryRelease, ruleSetOutput string, ruleSetUnstableOutput string) error {
+func generate(release *github.RepositoryRelease, output string, cnOutput string, ruleSetOutput string, ruleSetUnstableOutput string) error {
 	vData, err := download(release)
 	if err != nil {
 		return err
@@ -223,47 +306,89 @@ func generate(release *github.RepositoryRelease, ruleSetOutput string, ruleSetUn
 	}
 	filterTags(domainMap)
 	mergeTags(domainMap)
-
+	outputPath, _ := filepath.Abs(output)
+	os.Stderr.WriteString("write " + outputPath + "\n")
+	outputFile, err := os.Create(output)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+	writer := bufio.NewWriter(outputFile)
+	err = geosite.Write(writer, domainMap)
+	if err != nil {
+		return err
+	}
+	err = writer.Flush()
+	if err != nil {
+		return err
+	}
+	cnCodes := []string{
+		"geolocation-cn",
+	}
+	cnDomainMap := make(map[string][]geosite.Item)
+	for _, cnCode := range cnCodes {
+		cnDomainMap[cnCode] = domainMap[cnCode]
+	}
+	cnOutputFile, err := os.Create(cnOutput)
+	if err != nil {
+		return err
+	}
+	defer cnOutputFile.Close()
+	writer.Reset(cnOutputFile)
+	err = geosite.Write(writer, cnDomainMap)
+	if err != nil {
+		return err
+	}
+	err = writer.Flush()
+	if err != nil {
+		return err
+	}
 	os.RemoveAll(ruleSetOutput)
 	os.RemoveAll(ruleSetUnstableOutput)
-	os.MkdirAll(ruleSetOutput, 0o755)
-	os.MkdirAll(ruleSetUnstableOutput, 0o755)
-
+	err = os.MkdirAll(ruleSetOutput, 0o755)
+	err = os.MkdirAll(ruleSetUnstableOutput, 0o755)
+	if err != nil {
+		return err
+	}
 	for code, domains := range domainMap {
+		var headlessRule option.DefaultHeadlessRule
 		defaultRule := geosite.Compile(domains)
-		headlessRule := option.DefaultHeadlessRule{
-			Domain:        defaultRule.Domain,
-			DomainSuffix:  defaultRule.DomainSuffix,
-			DomainKeyword: defaultRule.DomainKeyword,
-			DomainRegex:   defaultRule.DomainRegex,
-		}
-		ruleSet := option.PlainRuleSet{
-			Rules: []option.HeadlessRule{
-				{Type: C.RuleTypeDefault, DefaultOptions: headlessRule},
+		headlessRule.Domain = defaultRule.Domain
+		headlessRule.DomainSuffix = defaultRule.DomainSuffix
+		headlessRule.DomainKeyword = defaultRule.DomainKeyword
+		headlessRule.DomainRegex = defaultRule.DomainRegex
+		var plainRuleSet option.PlainRuleSet
+		plainRuleSet.Rules = []option.HeadlessRule{
+			{
+				Type:           C.RuleTypeDefault,
+				DefaultOptions: headlessRule,
 			},
 		}
-		srsPath := filepath.Join(ruleSetOutput, code+".srs")
-		unstablePath := filepath.Join(ruleSetUnstableOutput, code+".srs")
-
-		f1, err := os.Create(srsPath)
+		srsPath, _ := filepath.Abs(filepath.Join(ruleSetOutput, "geosite-"+code+".srs"))
+		unstableSRSPath, _ := filepath.Abs(filepath.Join(ruleSetUnstableOutput, "geosite-"+code+".srs"))
+		// os.Stderr.WriteString("write " + srsPath + "\n")
+		var (
+			outputRuleSet         *os.File
+			outputRuleSetUnstable *os.File
+		)
+		outputRuleSet, err = os.Create(srsPath)
 		if err != nil {
 			return err
 		}
-		if err := srs.Write(f1, ruleSet, false); err != nil {
-			f1.Close()
-			return err
-		}
-		f1.Close()
-
-		f2, err := os.Create(unstablePath)
+		err = srs.Write(outputRuleSet, plainRuleSet, false)
+		outputRuleSet.Close()
 		if err != nil {
 			return err
 		}
-		if err := srs.Write(f2, ruleSet, true); err != nil {
-			f2.Close()
+		outputRuleSetUnstable, err = os.Create(unstableSRSPath)
+		if err != nil {
 			return err
 		}
-		f2.Close()
+		err = srs.Write(outputRuleSetUnstable, plainRuleSet, true)
+		outputRuleSetUnstable.Close()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -272,34 +397,39 @@ func setActionOutput(name string, content string) {
 	os.Stdout.WriteString("::set-output name=" + name + "::" + content + "\n")
 }
 
-func release(source, destination, ruleSetOutput, ruleSetUnstableOutput string) error {
-	src, err := fetch(source)
+func release(source string, destination string, output string, cnOutput string, ruleSetOutput string, ruleSetOutputUnstable string) error {
+	sourceRelease, err := fetch(source)
 	if err != nil {
 		return err
 	}
-	dst, err := fetch(destination)
+	destinationRelease, err := fetch(destination)
 	if err != nil {
 		log.Warn("missing destination latest release")
-	} else if os.Getenv("NO_SKIP") != "true" && strings.Contains(*dst.Name, *src.Name) {
-		log.Info("already latest")
-		setActionOutput("skip", "true")
-		return nil
+	} else {
+		if os.Getenv("NO_SKIP") != "true" && strings.Contains(*destinationRelease.Name, *sourceRelease.Name) {
+			log.Info("already latest")
+			setActionOutput("skip", "true")
+			return nil
+		}
 	}
-	err = generate(src, ruleSetOutput, ruleSetUnstableOutput)
+	err = generate(sourceRelease, output, cnOutput, ruleSetOutput, ruleSetOutputUnstable)
 	if err != nil {
 		return err
 	}
-	setActionOutput("tag", *src.Name)
+	setActionOutput("tag", *sourceRelease.Name)
 	return nil
 }
 
 func main() {
-	if err := release(
+	err := release(
 		"v2fly/domain-list-community",
 		"sagernet/sing-geosite",
+		"geosite.db",
+		"geosite-cn.db",
 		"rule-set",
 		"rule-set-unstable",
-	); err != nil {
+	)
+	if err != nil {
 		log.Fatal(err)
 	}
 }
