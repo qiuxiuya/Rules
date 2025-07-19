@@ -1,0 +1,10 @@
+# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/rutracker
+
+.maintracker.org
+.rutracker.cc
+.rutracker.cr
+.rutracker.me
+.rutracker.nl
+.rutracker.org
+.rutrecker.net
+.rutrk.org
