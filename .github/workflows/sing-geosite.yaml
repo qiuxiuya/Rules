@@ -1,0 +1,55 @@
+name: Synchronization GEO Asset
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "**/README.md"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get latest go version
+        id: version
+        run: |
+          echo ::set-output name=go_version::$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json | grep -oE '"version": "[0-9]{1}.[0-9]{1,}(.[0-9]{1,})?"' | head -1 | cut -d':' -f2 | sed 's/ //g; s/"//g')
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ steps.version.outputs.go_version }}
+
+      - name: Set timezone to WIB Jakarta
+        uses: szenius/set-timezone@v1.2
+        with:
+          timezoneLinux: "Asia/Jakarta"
+          timezoneMacos: "Asia/Jakarta"
+          timezoneWindows: "Indonesia Standard Time"
+
+      - name: Delete Old Release
+        uses: dev-drprasad/delete-older-releases@v0.2.1
+        with:
+          repo: geosite/sing-box
+          keep_latest: 1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push updates to geosite branch's sing-box folder
+        run: |
+          git fetch origin geosite || true
+          git switch geosite || git checkout -b geosite
+
+          rm -rf sing-box/*
+          cp -r sing-geosite/rule-set-geosite/* sing-box/
+
+          git add sing-box/
+          git commit -m "Update sing-box files on geosite branch [CI]" || echo "No changes to commit"
+          git push origin geosite
