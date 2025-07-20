@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Set git identity
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Switch to geosite branch
+      run: |
+        git fetch origin geosite || true
+        git switch geosite || git checkout -b geosite
+
+    - name: Prepare sing-box directory
+      run: |
+        rm -rf sing-box
+        mkdir -p sing-box
+
+    - name: Run Go in sing-box directory
+      run: |
+        cd sing-box
+        go run ../main.go
+
+    - name: Copy additional .srs files
+      run: |
+        cp rule-set/*.srs sing-box/
+        cp rule-set-unstable/*.srs sing-box/
+
+    - name: Commit and Push
+      run: |
+        git add sing-box/
+        git commit -m "Update geosite files [CI]" || echo "Nothing to commit"
+        git push origin geosite
