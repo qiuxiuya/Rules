@@ -1,4 +1,4 @@
-name: Build
+name: Build and Push Geosite
 
 on:
   workflow_dispatch:
@@ -25,7 +25,7 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-    - name: Switch to geosite branch
+    - name: Switch to or create geosite branch
       run: |
         git fetch origin geosite || true
         git switch geosite || git checkout -b geosite
@@ -39,13 +39,13 @@ jobs:
         rm -rf output
         mkdir -p output
 
-    - name: Copy .srs files
+    - name: Copy generated .srs files
       run: |
-        cp rule-set/*.srs output/
-        cp rule-set-unstable/*.srs output/
+        cp rule-set/*.srs output/ || echo "no files in rule-set"
+        cp rule-set-unstable/*.srs output/ || echo "no files in rule-set-unstable"
 
-    - name: Commit and Push
+    - name: Commit and Push changes
       run: |
         git add output/
-        git commit -m "Update geosite files [CI]" || echo "Nothing to commit"
+        git diff --cached --quiet || git commit -m "Update geosite files [CI]"
         git push origin geosite
