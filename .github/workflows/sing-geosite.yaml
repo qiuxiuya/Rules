@@ -37,7 +37,7 @@ jobs:
       - name: Delete Old Release
         uses: dev-drprasad/delete-older-releases@v0.2.1
         with:
-          repo: geosite/sing-box
+          repo: qiuxiuya/Rules
           keep_latest: 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
