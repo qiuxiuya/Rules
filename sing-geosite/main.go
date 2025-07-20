@@ -422,7 +422,10 @@ func release(source string, destination string, output string, cnOutput string, 
 
 func main() {
 	err := release(
+		"malikshi/v2ray-rules-dat",
 		"malikshi/sing-geosite",
+		"geosite.db",
+		"geosite-cn.db",
 		"rule-set-geosite",
 		"rule-set-unstable",
 	)
