@@ -38,7 +38,7 @@ jobs:
     - name: Run Go in sing-box directory
       run: |
         cd sing-box
-        go run ../main.go
+        go run main.go
 
     - name: Copy additional .srs files
       run: |
