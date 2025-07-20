@@ -1,4 +1,5 @@
 name: Synchronization GEO Asset
+
 on:
   workflow_dispatch:
   push:
@@ -11,6 +12,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -20,7 +22,7 @@ jobs:
       - name: Get latest go version
         id: version
         run: |
-          echo ::set-output name=go_version::$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json | grep -oE '"version": "[0-9]{1}.[0-9]{1,}(.[0-9]{1,})?"' | head -1 | cut -d':' -f2 | sed 's/ //g; s/"//g')
+          echo "::set-output name=go_version::$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json | grep -oE '\"version\": \"[0-9]{1}\.[0-9]{1,}(\.[0-9]{1,})?\"' | head -1 | cut -d':' -f2 | sed 's/ //g; s/\"//g')"
 
       - name: Setup Go
         uses: actions/setup-go@v2
@@ -47,9 +49,20 @@ jobs:
           git fetch origin geosite || true
           git switch geosite || git checkout -b geosite
 
+          mkdir -p sing-box
+
+          echo "查看源目录内容："
+          ls -l sing-geosite/rule-set-geosite || echo "目录不存在或为空"
+
           rm -rf sing-box/*
+
           cp -r sing-geosite/rule-set-geosite/* sing-box/
+
+          echo "查看目标目录内容："
+          ls -l sing-box
 
           git add sing-box/
           git commit -m "Update sing-box files on geosite branch [CI]" || echo "No changes to commit"
           git push origin geosite
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
