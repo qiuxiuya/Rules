@@ -30,23 +30,22 @@ jobs:
         git fetch origin geosite || true
         git switch geosite || git checkout -b geosite
 
-    - name: Prepare sing-box directory
+    - name: Run Go (main.go in sing-box)
       run: |
-        rm -rf sing-box
-        mkdir -p sing-box
+        go run sing-box/main.go
 
-    - name: Run Go in sing-box directory
+    - name: Prepare output directory
       run: |
-        cd sing-box
-        go run main.go
+        rm -rf output
+        mkdir -p output
 
-    - name: Copy additional .srs files
+    - name: Copy .srs files
       run: |
-        cp rule-set/*.srs sing-box/
-        cp rule-set-unstable/*.srs sing-box/
+        cp rule-set/*.srs output/
+        cp rule-set-unstable/*.srs output/
 
     - name: Commit and Push
       run: |
-        git add sing-box/
+        git add output/
         git commit -m "Update geosite files [CI]" || echo "Nothing to commit"
         git push origin geosite
