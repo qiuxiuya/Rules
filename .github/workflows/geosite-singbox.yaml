@@ -25,14 +25,14 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-    - name: Switch to or create geosite branch
+    - name: Switch to geosite branch
       run: |
         git fetch origin geosite || true
         git switch geosite || git checkout -b geosite
 
     - name: Run Go (main.go in sing-box)
       run: |
-        go run sing-box/main.go
+        go run $GITHUB_WORKSPACE/sing-box/main.go
 
     - name: Prepare output directory
       run: |
