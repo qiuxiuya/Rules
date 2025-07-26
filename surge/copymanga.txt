@@ -1,0 +1,6 @@
+# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/copymanga
+
+.copy-manga.com
+.mangacopy.com
+.mangafuna.xyz
+.mangafunb.fun

@@ -1,0 +1,20 @@
+# Generated from https://github.com/v2fly/domain-list-community/tree/master/data/kuaishou
+
+.adbkwai.com
+.adkwai.com
+.adukwai.com
+.e.kuaishou.cn
+.ecukwai.com
+.gifshow.com
+.inkwai.com
+.ksapisrv.com
+.kskwai.com
+.kuaishou.com
+.kuaishouapps.com
+.kuaishoupay.com
+.kuaishouzt.com
+.kwaicdn.com
+.kwaizt.com
+.kwimgs.com
+.wsukwai.com
+.yximgs.com
