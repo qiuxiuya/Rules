@@ -1,0 +1,21 @@
+{
+  "version": 3,
+  "rules": [
+    {
+      "domain_suffix": [
+        "afreecatv.com",
+        "coupangplay.com",
+        "jtbc.co.kr",
+        "kbs.co.kr",
+        "naver.com",
+        "navercorp.com",
+        "pandalive.co.kr",
+        "pooq.co.kr",
+        "pstatic.net",
+        "smartmediarep.com",
+        "tving.com",
+        "wavve.com"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "version": 3,
+  "rules": [
+    {
+      "domain_suffix": [
+        "aisandbox-pa.googleapis.com",
+        "aistudio.google.com",
+        "alkalicore-pa.clients6.google.com",
+        "alkalimakersuite-pa.clients6.google.com",
+        "anthropic.com",
+        "chatgpt.com",
+        "claude.ai",
+        "copilot.microsoft.com",
+        "gemini.google.com",
+        "generativelanguage.googleapis.com",
+        "oaistatic.com",
+        "oaiusercontent.com",
+        "openai.com",
+        "proactivebackend-pa.googleapis.com",
+        "robinfrontend-pa.googleapis.com",
+        "sora.com",
+        "waa-pa.clients6.google.com"
+      ]
+    }
+  ]
+}

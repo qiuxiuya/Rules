@@ -1,0 +1,51 @@
+{
+  "version": 3,
+  "rules": [
+    {
+      "domain_suffix": [
+        "71.am",
+        "71.am.com",
+        "71edge.com",
+        "71edge.net",
+        "aianno.cn",
+        "aianno.com",
+        "aiqiyicloud-mgmt.com",
+        "aiqiyicloud.com",
+        "aiqiyicloud.net",
+        "baiying.com",
+        "bilibili.com",
+        "gitv.cn",
+        "gitv.tv",
+        "ibkstore.com",
+        "iq.com",
+        "iqiyi.com",
+        "iqiyi.demo.uwp",
+        "iqiyiedge.com",
+        "iqiyiedge.net",
+        "iqiyipic.com",
+        "jiangbing.cn",
+        "music.126.net",
+        "music.163.com",
+        "pps.tv",
+        "ppsimg.com",
+        "ppstream.cn",
+        "ppstream.com",
+        "ppstream.com.cn",
+        "ppstream.net",
+        "ppstream.net.cn",
+        "ppsurl.com",
+        "qiyi.cn",
+        "qiyi.com",
+        "qiyipic.com",
+        "qy.com",
+        "qy.net",
+        "soku.com",
+        "suike.cn",
+        "ykimg.com",
+        "youku.com",
+        "youtube.com",
+        "youtubei.googleapis.com"
+      ]
+    }
+  ]
+}

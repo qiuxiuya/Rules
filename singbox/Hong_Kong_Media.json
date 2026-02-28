@@ -1,0 +1,35 @@
+{
+  "version": 3,
+  "rules": [
+    {
+      "domain_suffix": [
+        "api.biliapi.com",
+        "api.biliapi.net",
+        "api.bilibili.com",
+        "app.biliapi.com",
+        "app.biliapi.net",
+        "app.bilibili.com",
+        "discomax.com",
+        "grpc.biliapi.net",
+        "hbo.com",
+        "hbogo.com",
+        "hbomax.com",
+        "hbomaxcdn.com",
+        "hbonow.com",
+        "hoy.tv",
+        "max.com",
+        "maxgo.com",
+        "mytvsuper.com",
+        "mytvsuperlimited.hb.omtrdc.net",
+        "mytvsuperlimited.sc.omtrdc.net",
+        "now.com",
+        "nowe.com",
+        "nowestatic.com",
+        "tvb.com",
+        "viu.now.com",
+        "viu.tv",
+        "www.bilibili.com"
+      ]
+    }
+  ]
+}
